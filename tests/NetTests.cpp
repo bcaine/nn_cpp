@@ -13,13 +13,13 @@
 
 #include <boost/test/unit_test.hpp>
 #include "Net.h"
-#include <unsupported/Eigen/CXX11/Tensor>
-#include <iostream>
+
 
 BOOST_AUTO_TEST_CASE(test_net) {
     nn::Net<float> net;
-    net.add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true));
-    net.add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true));
+    net.add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true))
+       .add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true))
+       .add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true));
     net.printShapes();
 
     Eigen::Tensor<float, 2> input(1, 1);

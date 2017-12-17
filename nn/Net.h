@@ -30,12 +30,11 @@ namespace nn {
         template <int inputDim, int outputDim>
         Eigen::Tensor<Dtype, outputDim> forward(Eigen::Tensor<Dtype, inputDim> input) {
             if (m_layers.empty()) {
-                std::cerr << "No layers specified";
+                std::cerr << "No layers specified" << std::endl;
                 return {};
             }
 
             auto currentInput = input;
-
             for (const auto &layer : m_layers) {
                 currentInput = layer->forward(currentInput);
             }
@@ -82,6 +81,7 @@ namespace nn {
             layer->printInputShape();
             std::cout << "    ->    ";
             layer->printOutputShape();
+            layerNum ++;
         }
     }
 }

@@ -23,10 +23,6 @@ namespace nn {
          * @return An output tensor, which is fed into the next layer
          */
         virtual Eigen::Tensor<Dtype, Dims> forward(const Eigen::Tensor<Dtype, Dims> &input) = 0;
-//        Eigen::Tensor<Dtype, Dims> forward(const Eigen::Tensor<Dtype, Dims> &input) {
-//            std::cerr << "Called forward on Base class Layer. No operation performed" << std::endl;
-//            return input;
-//        }
 
         /**
          * @brief Perform the backwards operation on the layer.
@@ -34,11 +30,6 @@ namespace nn {
          * @return The output tensor, which is fed into the previous layer
          */
          virtual Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &output) = 0;
-//        template <int Dims>
-//        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input) {
-//            std::cerr << "Called backward on Base class Layer. No operation performed" << std::endl;
-//            return input;
-//        }
 
         // TODO: There has to be a better way to do this
         virtual void printInputShape() = 0;
