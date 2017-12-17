@@ -77,10 +77,9 @@ namespace nn {
     void Net<Dtype>::printShapes() {
         int layerNum = 0;
         for (const auto &layer : m_layers) {
-            std::cout << "Layer " << layerNum << std::endl;
-            layer->printInputShape();
-            std::cout << "    ->    ";
+            std::cout << "Layer " << layerNum << " Output Shape: ";
             layer->printOutputShape();
+            std::cout << std::endl;
             layerNum ++;
         }
     }

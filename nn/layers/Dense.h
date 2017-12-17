@@ -44,24 +44,13 @@ namespace nn {
          * @brief Get the input shape
          * @return The input shape
          */
-        Eigen::array<Eigen::Index, Dims> getInputShape() {
-            return m_inputShape;
-        };
 
         Eigen::array<Eigen::Index, Dims> getOutputShape() {
             return m_outputShape;
         };
 
-        void printInputShape() {
-            std::cout << "[";
-            for (const auto &dim : m_inputShape) {
-                std::cout << dim << " ";
-            }
-            std::cout << "]";
-        }
-
         void printOutputShape() {
-            std::cout << "[";
+            std::cout << "[ ";
             for (const auto &dim : m_outputShape) {
                 std::cout << dim << " ";
             }
@@ -70,7 +59,6 @@ namespace nn {
 
     private:
         Eigen::array<Eigen::Index, Dims> m_outputShape; ///< The output shape of this layer
-        Eigen::array<Eigen::Index, Dims> m_inputShape;  ///< The input shape if this layer
         Eigen::Tensor<Dtype, Dims> m_weights; ///< Our weights of the layer
         Eigen::Tensor<Dtype, Dims> m_bias;    ///< The bias weights if specified
         bool m_useBias;                       ///< Whether we use the bias
@@ -81,7 +69,6 @@ namespace nn {
                               const Eigen::array<Eigen::Index, Dims> &inputShape,
                               bool useBias):
             m_outputShape(outputShape),
-            m_inputShape(inputShape),
             m_useBias(useBias)
     {
         m_weights = Eigen::Tensor<Dtype, Dims>(outputShape);

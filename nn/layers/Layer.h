@@ -32,7 +32,6 @@ namespace nn {
          virtual Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &output) = 0;
 
         // TODO: There has to be a better way to do this
-        virtual void printInputShape() = 0;
         virtual void printOutputShape() = 0;
     };
 }
