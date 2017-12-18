@@ -74,8 +74,18 @@ namespace nn {
             return *this;
         }
 
-        void printShapes();
+        /**
+         * Add a softmax layer
+         * @param softmaxLayer [in]: The softmax layer to add
+         * @return A reference to *this for method chaining
+         */
+        template <int Dims>
+        Net<Dtype>& add(Softmax<Dtype, Dims> *softmaxLayer) {
+            m_layers.push_back(std::unique_ptr<Layer<Dtype>>(softmaxLayer));
+            return *this;
+        }
 
+        void printShapes();
 
     private:
         std::vector<std::unique_ptr<Layer<Dtype>>> m_layers; ///< A vector of all our layers
