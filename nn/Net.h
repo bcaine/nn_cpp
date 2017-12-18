@@ -11,7 +11,9 @@
 #define NN_CPP_NET_H
 
 #include "layers/Layer.h"
+// TODO: Move to an easy to import layers
 #include "layers/Dense.h"
+#include "layers/Relu.h"
 #include <vector>
 
 namespace nn {
@@ -57,6 +59,17 @@ namespace nn {
         Net<Dtype>& add(Dense<Dtype, Dims> *denseLayer) {
             // Do shape checks here
             m_layers.push_back(std::unique_ptr<Layer<Dtype>>(denseLayer));
+            return *this;
+        }
+
+        /**
+         * Add a relu layer
+         * @param reluLayer [in]: The relu layer to add
+         * @return A reference to *this for method chaining
+         */
+        template <int Dims>
+        Net<Dtype>& add(Relu<Dtype, Dims> *reluLayer) {
+            m_layers.push_back(std::unique_ptr<Layer<Dtype>>(reluLayer));
             return *this;
         }
 

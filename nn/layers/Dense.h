@@ -10,7 +10,7 @@
 #ifndef NN_CPP_DENSE_H
 #define NN_CPP_DENSE_H
 
-#include "Layer.h"
+#include "layers/Layer.h"
 
 namespace nn {
     template <typename Dtype = float, int Dims = 2>
