@@ -18,13 +18,12 @@ namespace nn {
     public:
         /**
          * @brief Create a Dense layer
-         * @param outputShape [in]: The output dimensionality
-         * @param inputShape [in]: The input dimensionality
+         * @param batchSize [in]: The batch size going through the network
+         * @param inputDimension [in]: Expected input dimension
+         * @param outputDimension [in]: The output dimensionality (number of neurons)
          * @param useBias [in]: Whether to use a bias term
          */
-        explicit Dense(const Eigen::array<Eigen::Index, Dims> &outputShape,
-                       const Eigen::array<Eigen::Index, Dims> &inputShape,
-                       bool useBias);
+        explicit Dense(int batchSize, int inputDimension, int outputDimension, bool useBias);
 
         /**
          * @brief Forward through the layer (compute the output)
@@ -65,24 +64,24 @@ namespace nn {
     };
 
     template <typename Dtype, int Dims>
-    Dense<Dtype, Dims>::Dense(const Eigen::array<Eigen::Index, Dims> &outputShape,
-                              const Eigen::array<Eigen::Index, Dims> &inputShape,
-                              bool useBias):
-            m_outputShape(outputShape),
+    Dense<Dtype, Dims>::Dense(int batchSize, int inputDimension, int outputDimension, bool useBias):
+            m_outputShape({batchSize, outputDimension}),
             m_useBias(useBias)
     {
-        m_weights = Eigen::Tensor<Dtype, Dims>(outputShape);
+        m_weights = Eigen::Tensor<Dtype, Dims>(inputDimension, outputDimension);
         m_weights.setRandom();
 
+        // TODO: How to specify batch size?
         if (useBias) {
-            m_bias = Eigen::Tensor<Dtype, Dims>(outputShape);
+            m_bias = Eigen::Tensor<Dtype, Dims>(batchSize, outputDimension);
             m_bias.setRandom();
         }
     };
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Dense<Dtype, Dims>::forward(const Eigen::Tensor<Dtype, Dims> &input) {
-        // TODO: Add dimension checks
+        assert(input.dimensions()[1] == m_weights.dimensions()[0]);
+
         Eigen::array<Eigen::IndexPair<int>, 1> productDims = { Eigen::IndexPair<int>(1, 0) };
         auto result = input.contract(m_weights, productDims);
         if (m_useBias) {

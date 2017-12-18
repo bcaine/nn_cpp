@@ -55,6 +55,7 @@ namespace nn {
          */
         template <int Dims>
         Net<Dtype>& add(Dense<Dtype, Dims> *denseLayer) {
+            // Do shape checks here
             m_layers.push_back(std::unique_ptr<Layer<Dtype>>(denseLayer));
             return *this;
         }

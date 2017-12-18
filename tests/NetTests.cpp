@@ -17,12 +17,14 @@
 
 BOOST_AUTO_TEST_CASE(test_net) {
     nn::Net<float> net;
-    net.add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true))
-       .add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true))
-       .add(new nn::Dense<float, 2>({1, 1}, {1, 1}, true));
-    net.printShapes();
 
-    Eigen::Tensor<float, 2> input(1, 1);
+    // TODO: output of previous should match input of next. Can we auto-infer in some nice way?
+    int batchSize = 1;
+    net.add(new nn::Dense<float, 2>(batchSize, 28 * 28, 100, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 10, true));
+    
+    Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
 
     std::cout << "Input: " << input << std::endl;
