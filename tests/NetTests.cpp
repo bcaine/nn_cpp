@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE NetTests
 
 #include <boost/test/unit_test.hpp>
+#include <chrono>
 #include "Net.h"
 
 
@@ -44,6 +45,22 @@ BOOST_AUTO_TEST_CASE(test_relu) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_relu_back) {
+    std::cout << "Testing Relu Backwards" << std::endl;
+    nn::Relu<float, 2> relu;
+
+    int dim1 = 1;
+    int dim2 = 10;
+    Eigen::Tensor<float, 2> input(dim1, dim2);
+    input.setValues({{-10, -7, -5, -3, 0, 1, 3, 5, 7, 10}});
+
+    Eigen::Tensor<float, 2> result = relu.backward(input);
+
+    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 1, 1, 1, 1});
+    for (unsigned ii = 0; ii < dim2; ++ii) {
+        BOOST_REQUIRE_MESSAGE(result(0, ii) == expectedOutput[ii], "Output of relu.backward did not match");
+    }
+}
 
 BOOST_AUTO_TEST_CASE(test_softmax) {
     std::cout << "Testing softmax" << std::endl;
@@ -99,5 +116,10 @@ BOOST_AUTO_TEST_CASE(test_net2) {
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
 
+    auto startTime = std::chrono::system_clock::now();
     Eigen::Tensor<float, 2> result = net.forward<2, 2>(input);
+    auto endTime = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> duration = endTime - startTime;
+    std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s" << std::endl;
 }

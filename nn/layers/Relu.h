@@ -46,7 +46,7 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return input;
+        return (input > static_cast<Dtype>(0)).template cast<Dtype>();
     }
 }
 
