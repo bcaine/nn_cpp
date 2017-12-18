@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_relu) {
 }
 
 BOOST_AUTO_TEST_CASE(test_relu_back) {
-    std::cout << "Testing Relu Backwards" << std::endl;
+    std::cout << "Testing Relu backwards" << std::endl;
     nn::Relu<float, 2> relu;
 
     int dim1 = 1;
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_relu_back) {
 }
 
 BOOST_AUTO_TEST_CASE(test_softmax) {
-    std::cout << "Testing softmax" << std::endl;
+    std::cout << "Testing Softmax" << std::endl;
     nn::Softmax<float, 2> softmax;
 
     int inputBatchSize = 2;
@@ -77,6 +77,35 @@ BOOST_AUTO_TEST_CASE(test_softmax) {
     BOOST_REQUIRE_MESSAGE(result(0, 1) == 0.5, "Result(0, 1) did not match");
     BOOST_REQUIRE_MESSAGE(result(1, 0) == 0, "Result (1, 0) did not match");
     BOOST_REQUIRE_MESSAGE(result(1, 1) == 1, "Result (1, 1) did not match");
+
+
+    inputBatchSize = 1;
+    int inputSize = 100;
+    Eigen::Tensor<float, 2> input2(inputBatchSize, inputSize);
+    input2.setRandom();
+
+    Eigen::Tensor<float, 2> result2 = softmax.forward(input2);
+
+    float sum = 0;
+    for (unsigned int ii = 0; ii < inputSize; ++ii) {
+        sum += result2(0, ii);
+    }
+
+    BOOST_REQUIRE_CLOSE(sum, 1.0, 1e-5);
+}
+
+BOOST_AUTO_TEST_CASE(test_softmax_back) {
+    std::cout << "Testing Softmax backwards" << std::endl;
+    nn::Softmax<float, 2> softmax;
+
+    int inputBatchSize = 2;
+    Eigen::Tensor<float, 2> input(inputBatchSize, 2);
+    input.setValues({{5, 5},
+                     {-100, 100}});
+
+    std::cout << input << std::endl;
+    Eigen::Tensor<float, 2> result = softmax.backward(input);
+    std::cout << result << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_net1) {

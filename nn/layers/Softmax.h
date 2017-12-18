@@ -55,7 +55,7 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-
+        return input;
     }
 }
 
