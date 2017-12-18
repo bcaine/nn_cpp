@@ -27,17 +27,14 @@ BOOST_AUTO_TEST_CASE(test_net) {
 
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
-
-    std::cout << "Input: " << input << std::endl;
     Eigen::Tensor<float, 2> result = net.forward<2, 2>(input);
-    std::cout << "Output: " << result << std::endl;
+    BOOST_REQUIRE_MESSAGE(result.dimensions()[0] == batchSize, "Result dimension 0 did not match batch size");
+    BOOST_REQUIRE_MESSAGE(result.dimensions()[1] == 10, "Result dimension 1 did not match last dense layer");
 }
 
 BOOST_AUTO_TEST_CASE(test_relu) {
     std::cout << "Testing Relu" << std::endl;
-    nn::Net<float> net;
-
-    net.add(new nn::Relu<float, 2>());
+    nn::Relu<float, 2> relu;
 
     int dim1 = 1;
     int dim2 = 10;
@@ -45,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_relu) {
     input.setRandom();
     input = input * input.constant(-1.0f);
 
-    Eigen::Tensor<float, 2> result = net.forward<2, 2>(input);
+    Eigen::Tensor<float, 2> result = relu.forward(input);
     for (unsigned int ii = 0; ii < dim1; ++ii) {
         for (unsigned int jj = 0; jj < dim2; ++jj) {
             BOOST_REQUIRE_MESSAGE(result(ii, jj) == 0, "Element in result does not equal zero");
@@ -56,10 +53,28 @@ BOOST_AUTO_TEST_CASE(test_relu) {
     input(0, 5) = 10.0;
     input(0, 3) = 150.0;
 
-    result = net.forward<2, 2>(input);
+    result = relu.forward(input);
     for (unsigned int ii = 0; ii < dim1; ++ii) {
         for (unsigned int jj = 0; jj < dim2; ++jj) {
             BOOST_REQUIRE_MESSAGE(result(ii, jj) >= 0, "Element in result does is negative");
         }
     }
+}
+
+
+BOOST_AUTO_TEST_CASE(test_softmax) {
+    std::cout << "Testing softmax" << std::endl;
+    nn::Softmax<float, 2> softmax;
+
+    int inputBatchSize = 2;
+    Eigen::Tensor<float, 2> input(inputBatchSize, 2);
+    input.setValues({{5, 5},
+                     {-100, 100}});
+
+    Eigen::Tensor<float, 2> result = softmax.forward(input);
+
+    BOOST_REQUIRE_MESSAGE(result(0, 0) == 0.5, "Result(0, 0) did not match");
+    BOOST_REQUIRE_MESSAGE(result(0, 1) == 0.5, "Result(0, 1) did not match");
+    BOOST_REQUIRE_MESSAGE(result(1, 0) == 0, "Result (1, 0) did not match");
+    BOOST_REQUIRE_MESSAGE(result(1, 1) == 1, "Result (1, 1) did not match");
 }

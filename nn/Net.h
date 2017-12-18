@@ -14,6 +14,7 @@
 // TODO: Move to an easy to import layers
 #include "layers/Dense.h"
 #include "layers/Relu.h"
+#include "layers/Softmax.h"
 #include <vector>
 
 namespace nn {
