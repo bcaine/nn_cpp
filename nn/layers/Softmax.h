@@ -22,6 +22,15 @@ namespace nn {
         Softmax() = default;
 
         /**
+         * @brief Return the name of the layer
+         * @return The layer name
+         */
+        const std::string& getName() {
+            const static std::string name = "Softmax";
+            return name;
+        }
+
+        /**
          * @brief Forward through the layer (compute the output)
          * @param input [in]: The input tensor to apply softmax to
          * @return
@@ -36,6 +45,9 @@ namespace nn {
         Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
 
         void printOutputShape() {}
+
+    private:
+        Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };
 
     template <typename Dtype, int Dims>
@@ -47,14 +59,16 @@ namespace nn {
                                     .broadcast(Eigen::array<int, 2>{1, classDims});
 
         auto exponentiated = shiftedInput.exp();
-        return exponentiated * exponentiated.sum(Eigen::array<int, 1>{1})
-                               .inverse().eval()
-                               .reshape(Eigen::array<int, 2>({batchSize, 1}))
-                               .broadcast(Eigen::array<int, 2>({1, classDims}));
+        m_output = exponentiated * exponentiated.sum(Eigen::array<int, 1>{1})
+                                   .inverse().eval()
+                                   .reshape(Eigen::array<int, 2>({batchSize, 1}))
+                                   .broadcast(Eigen::array<int, 2>({1, classDims}));
+        return m_output;
     }
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
+        // Input should be the labels?
         return input;
     }
 }

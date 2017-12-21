@@ -115,8 +115,8 @@ BOOST_AUTO_TEST_CASE(test_net1) {
     // TODO: output of previous should match input of next. Can we auto-infer in some nice way?
     int batchSize = 1;
     net.add(new nn::Dense<float, 2>(batchSize, 28 * 28, 100, true))
-            .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
-            .add(new nn::Dense<float, 2>(batchSize, 100, 10, true));
+       .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 10, true));
 
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
@@ -127,18 +127,18 @@ BOOST_AUTO_TEST_CASE(test_net1) {
 
 BOOST_AUTO_TEST_CASE(test_net2) {
     std::cout << "Testing net creation" << std::endl;
-    nn::Net<float> net;
+    nn::Net<> net;
 
     int batchSize = 64;
     int inputX = 28;
     int inputY = 28;
-
+    bool useBias = false;
     // Basic MLP for testing MNSIT
-    net.add(new nn::Dense<float, 2>(batchSize, inputX * inputY, 100, true))
+    net.add(new nn::Dense<float, 2>(batchSize, inputX * inputY, 100, useBias))
        .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 100, useBias))
        .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 10, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 10, useBias))
        .add(new nn::Relu<float, 2>())
        .add(new nn::Softmax<float, 2>());
 
@@ -150,5 +150,6 @@ BOOST_AUTO_TEST_CASE(test_net2) {
     auto endTime = std::chrono::system_clock::now();
 
     std::chrono::duration<double> duration = endTime - startTime;
-    std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s" << std::endl;
+    std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s"
+              << std::endl;
 }

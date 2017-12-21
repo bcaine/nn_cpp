@@ -23,6 +23,15 @@ namespace nn {
         Relu() = default;
 
         /**
+         * @brief Return the name of the layer
+         * @return The layer name
+         */
+        const std::string& getName() {
+            const static std::string name = "Relu";
+            return name;
+        }
+
+        /**
          * @brief Forward through the layer (compute the output)
          * @param input [in]: The input tensor to apply Relu to
          * @return max(0, input)
@@ -37,11 +46,14 @@ namespace nn {
         Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
 
         void printOutputShape() {}
+    private:
+        Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::forward(const Eigen::Tensor<Dtype, Dims> &input) {
         return input.cwiseMax(static_cast<Dtype>(0));
+//        return m_output;
     };
 
     template <typename Dtype, int Dims>

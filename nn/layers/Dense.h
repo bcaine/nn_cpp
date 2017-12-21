@@ -26,6 +26,15 @@ namespace nn {
         explicit Dense(int batchSize, int inputDimension, int outputDimension, bool useBias);
 
         /**
+         * @brief Return the name of the layer
+         * @return The layer name
+         */
+        const std::string& getName() {
+            const static std::string name = "Dense";
+            return name;
+        }
+
+        /**
          * @brief Forward through the layer (compute the output)
          * @param input [in]: The input to the layer (either data or previous layer output)
          * @return The output of this layer
@@ -58,6 +67,7 @@ namespace nn {
 
     private:
         Eigen::array<Eigen::Index, Dims> m_outputShape; ///< The output shape of this layer
+        Eigen::Tensor<Dtype, Dims> m_output;  ///< The output of the forward pass
         Eigen::Tensor<Dtype, Dims> m_weights; ///< Our weights of the layer
         Eigen::Tensor<Dtype, Dims> m_bias;    ///< The bias weights if specified
         bool m_useBias;                       ///< Whether we use the bias
@@ -84,10 +94,14 @@ namespace nn {
 
         Eigen::array<Eigen::IndexPair<int>, 1> productDims = { Eigen::IndexPair<int>(1, 0) };
         auto result = input.contract(m_weights, productDims);
+
         if (m_useBias) {
-            return result + m_bias;
+            m_output = result + m_bias;
+        } else {
+            m_output = result;
         }
-        return result;
+
+        return m_output;
     }
 
     template <typename Dtype, int Dims>

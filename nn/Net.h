@@ -37,6 +37,9 @@ namespace nn {
                 return {};
             }
 
+            // TODO: How to ensure each forward call returns a lazily evaluated expression instead of a Tensor
+            // That way we can use this to autogenerate the evaluation chain for efficiency.
+            // Right now it seems to evaluate each layer individually.
             auto currentInput = input;
             for (const auto &layer : m_layers) {
                 currentInput = layer->forward(currentInput);
