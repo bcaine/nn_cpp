@@ -39,7 +39,7 @@ namespace nn {
 
         /**
          * @brief Compute the gradient (backwards pass) of the layer
-         * @param input [in]: The input tensor to the backwards pass (from the next layer)
+         * @param input [in]: The input tensor to the backwards pass (from the next layer). This should be one hot encoded labels
          * @return The output of the backwards pass (sent ot the previous layer)
          */
         Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
@@ -68,8 +68,10 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        // Input should be the labels?
-        return input;
+        int batchSize = input.dimensions()[0];
+        // Input will be labels
+        assert(batchSize == m_output.dimensions()[0]), "Dimensions of number of batches does not match";
+        return (m_output * (input * input.constant(-1))) / input.constant(batchSize);
     }
 }
 

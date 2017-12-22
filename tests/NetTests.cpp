@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_softmax) {
         sum += result2(0, ii);
     }
 
-    BOOST_REQUIRE_CLOSE(sum, 1.0, 1e-5);
+    BOOST_REQUIRE_CLOSE(sum, 1.0, 1e-3);
 }
 
 BOOST_AUTO_TEST_CASE(test_softmax_back) {
@@ -100,12 +100,18 @@ BOOST_AUTO_TEST_CASE(test_softmax_back) {
 
     int inputBatchSize = 2;
     Eigen::Tensor<float, 2> input(inputBatchSize, 2);
-    input.setValues({{5, 5},
+    input.setValues({{5, 7},
                      {-100, 100}});
 
-    std::cout << input << std::endl;
-    Eigen::Tensor<float, 2> result = softmax.backward(input);
-    std::cout << result << std::endl;
+    Eigen::Tensor<float, 2> result = softmax.forward(input);
+
+    Eigen::Tensor<float, 2> labels(inputBatchSize, 2);
+    labels.setValues({{0, 1},
+                      {0, 1}});
+
+    // Already has state from forward
+    Eigen::Tensor<float, 2> backwardsResult = softmax.backward(labels);
+    // TODO: Add actual tests. Test against TF/Pytorch?
 }
 
 BOOST_AUTO_TEST_CASE(test_net1) {
