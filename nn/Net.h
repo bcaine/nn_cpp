@@ -10,12 +10,9 @@
 #ifndef NN_CPP_NET_H
 #define NN_CPP_NET_H
 
-#include "layers/Layer.h"
-// TODO: Move to an easy to import layers
-#include "layers/Dense.h"
-#include "layers/Relu.h"
-#include "layers/Softmax.h"
+#include "layers/Layers.h"
 #include <vector>
+#include <memory>
 
 
 namespace nn {
