@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_relu_back) {
 
     Eigen::Tensor<float, 2> result = relu.backward(input);
 
-    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 1, 1, 1, 1});
+    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 3, 5, 7, 10});
     for (unsigned ii = 0; ii < dim2; ++ii) {
         BOOST_REQUIRE_MESSAGE(result(0, ii) == expectedOutput[ii], "Output of relu.backward did not match");
     }
@@ -138,15 +138,16 @@ BOOST_AUTO_TEST_CASE(test_net2) {
     int batchSize = 64;
     int inputX = 28;
     int inputY = 28;
-    bool useBias = false;
+    int numClasses = 10;
+    bool useBias = true;
     // Basic MLP for testing MNSIT
-    net.add(new nn::Dense<float, 2>(batchSize, inputX * inputY, 100, useBias))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 100, useBias))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 10, useBias))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Softmax<float, 2>());
+    net.add(new nn::Dense<>(batchSize, inputX * inputY, 100, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Dense<>(batchSize, 100, 100, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Dense<>(batchSize, 100, 10, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Softmax<>());
 
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
@@ -158,4 +159,11 @@ BOOST_AUTO_TEST_CASE(test_net2) {
     std::chrono::duration<double> duration = endTime - startTime;
     std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s"
               << std::endl;
+
+    Eigen::Tensor<float, 2> fakeLabels(batchSize, numClasses);
+    fakeLabels.setZero();
+    fakeLabels.setValues({{0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+                          {0, 1, 0, 0, 0, 0, 0, 0, 0, 1}});
+
+    net.backward<2>(fakeLabels);
 }

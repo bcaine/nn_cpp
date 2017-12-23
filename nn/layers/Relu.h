@@ -45,6 +45,11 @@ namespace nn {
          */
         Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
 
+        /**
+         * @brief Void function in relu
+         */
+        void updateWeights(float learningRate) {}
+
         void printOutputShape() {}
     private:
         Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
@@ -53,12 +58,11 @@ namespace nn {
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::forward(const Eigen::Tensor<Dtype, Dims> &input) {
         return input.cwiseMax(static_cast<Dtype>(0));
-//        return m_output;
     };
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return (input > static_cast<Dtype>(0)).template cast<Dtype>();
+        return input * (input > static_cast<Dtype>(0)).template cast<Dtype>();
     }
 }
 

@@ -39,10 +39,15 @@ namespace nn {
 
         /**
          * @brief Compute the gradient (backwards pass) of the layer
-         * @param input [in]: The input tensor to the backwards pass (from the next layer). This should be one hot encoded labels
+         * @param accumulatedGrad [in]: The input tensor to the backwards pass (from the next layer). This should be one hot encoded labels
          * @return The output of the backwards pass (sent ot the previous layer)
          */
-        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
+        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad);
+
+        /**
+         * @brief Update Weights (doesn't do anything w/ softmax)
+         */
+        void updateWeights(float learningRate) {}
 
         void printOutputShape() {}
 
@@ -67,11 +72,11 @@ namespace nn {
     }
 
     template <typename Dtype, int Dims>
-    Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        int batchSize = input.dimensions()[0];
+    Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad) {
+        const int batchSize = accumulatedGrad.dimensions()[0];
         // Input will be labels
-        assert(batchSize == m_output.dimensions()[0]), "Dimensions of number of batches does not match";
-        return (m_output * (input * input.constant(-1))) / input.constant(batchSize);
+        assert(batchSize == m_output.dimensions()[0] && "Dimensions of number of batches does not match");
+        return (m_output * (accumulatedGrad * accumulatedGrad.constant(-1))) / accumulatedGrad.constant(batchSize);
     }
 }
 

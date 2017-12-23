@@ -36,6 +36,12 @@ namespace nn {
          */
         virtual Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &output) = 0;
 
+        /**
+         * @brief Update the weights after a backwards pass
+         * @param learningRate [in]: Amount to update the weights by
+         */
+        virtual void updateWeights(float learningRate) = 0;
+
         // TODO: There has to be a better way to do this
         virtual void printOutputShape() = 0;
     };

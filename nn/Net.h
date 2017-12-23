@@ -17,6 +17,7 @@
 #include "layers/Softmax.h"
 #include <vector>
 
+
 namespace nn {
 
     /**
@@ -45,6 +46,20 @@ namespace nn {
                 currentInput = layer->forward(currentInput);
             }
             return currentInput;
+        }
+
+        template <int labelDims>
+        void backward(Eigen::Tensor<Dtype, labelDims> input) {
+            if (m_layers.empty()) {
+                std::cerr << "No layers specified" << std::endl;
+                return;
+            }
+
+            auto accumulatedGrad = input;
+            for (auto rit = m_layers.rbegin(); rit != m_layers.rend(); ++rit) {
+                accumulatedGrad = (*rit)->backward(accumulatedGrad);
+            }
+
         }
 
         /**
