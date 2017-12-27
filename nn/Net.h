@@ -56,7 +56,16 @@ namespace nn {
             for (auto rit = m_layers.rbegin(); rit != m_layers.rend(); ++rit) {
                 accumulatedGrad = (*rit)->backward(accumulatedGrad);
             }
+        }
 
+        /**
+         * @brief Update weights for each layer
+         * @param learningRate [in]: Learning rate with amount to update
+         */
+        void updateWeights(float learningRate) {
+            for (auto &layer : m_layers) {
+                layer->updateWeights(learningRate);
+            }
         }
 
         /**

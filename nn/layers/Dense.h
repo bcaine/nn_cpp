@@ -136,7 +136,7 @@ namespace nn {
         m_weightsGrad = m_inputCache.contract(accumulatedGrad, transposeInput);
 
         if (m_useBias) {
-            m_biasGrad = accumulatedGrad.sum(Eigen::array<int, 1>{0}).eval().reshape(Eigen::array<Eigen::Index, 2>{m_outputShape[1], 1});
+            m_biasGrad = accumulatedGrad.sum(Eigen::array<int, 1>{0}).eval().reshape(Eigen::array<Eigen::Index, 2>{1, m_outputShape[1]});
         }
 
         // accumulatedGrad is of shape (batchSize, outputDimensions)
@@ -149,10 +149,12 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     void Dense<Dtype, Dims>::updateWeights(float learningRate) {
-        m_weights += m_weightsGrad * m_weightsGrad.constant(learningRate);
+//        std::cout << "Weights before: " << m_weights << std::endl;
+        m_weights -= m_weightsGrad.constant(learningRate) * m_weightsGrad;
+//        std::cout << "Weights after: " << m_weights << std::endl;
 
         if (m_useBias) {
-            m_bias += m_biasGrad * m_biasGrad.constant(learningRate);
+            m_bias -= m_biasGrad.constant(learningRate) * m_biasGrad;
         }
     }
 }

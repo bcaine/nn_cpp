@@ -7,14 +7,17 @@
  * @author Ben Caine
  */
 #include "../nn/Net.h"
+#include "../nn/loss/CrossEntropy.h"
+#include "../nn/loss/MeanSquaredError.h"
 #include <random>
 #include <vector>
+#include <fstream>
 
 struct ToyLabeledData {
     std::vector<std::pair<float, float>> data;
     std::vector<int> labels;
 
-    int getSize() {
+    int getSize() const {
         assert (labels.size() == data.size());
         return labels.size();
     }
@@ -63,6 +66,22 @@ ToyLabeledData generateCircleData(int numInnerPoints, int numOuterPoints) {
     return dataset;
 };
 
+void writeDataset(const ToyLabeledData &data, const std::string &dataPath, const std::string &labelPath) {
+    std::ofstream dataFile;
+    std::ofstream labelFile;
+
+    dataFile.open(dataPath);
+    labelFile.open(labelPath);
+
+    for (unsigned int ii = 0; ii < data.getSize(); ++ii) {
+        dataFile << data.data[ii].first << ", " << data.data[ii].second << "\n";
+        labelFile << data.labels[ii] << "\n";
+    }
+
+    dataFile.close();
+    labelFile.close();
+}
+
 int main() {
     nn::Net<float> net;
 
@@ -71,7 +90,6 @@ int main() {
     int batchSize = firstClassSize + secondClassSize;
     int inputSize = 2;
     int numClasses = 2;
-    bool useBias = true;
 
     Eigen::Tensor<float, 2> inputData(batchSize, inputSize);
     Eigen::Tensor<float, 2> labels(batchSize, inputSize);
@@ -79,6 +97,7 @@ int main() {
     labels.setZero();
 
     auto dataset = generateCircleData(firstClassSize, secondClassSize);
+    writeDataset(dataset, "/home/ben/Desktop/data.csv", "/home/ben/Desktop/labels.csv");
     int datasetSize = dataset.getSize();
     for (unsigned int ii = 0; ii < datasetSize; ++ii) {
         inputData(ii, 0) = dataset.data[ii].first;
@@ -88,14 +107,35 @@ int main() {
         labels(ii, 1) = static_cast<float>(dataset.labels[ii] == 1);
     }
 
-    net.add(new nn::Dense<>(batchSize, inputSize, 6, useBias));
+    int numHiddenNodes = 10;
+    bool useBias = true;
+    net.add(new nn::Dense<>(batchSize, inputSize, numHiddenNodes, useBias));
     net.add(new nn::Relu<>());
-    net.add(new nn::Dense<>(batchSize, 6, 2, useBias));
+    net.add(new nn::Dense<>(batchSize, numHiddenNodes, numHiddenNodes, useBias));
     net.add(new nn::Relu<>());
+    net.add(new nn::Dense<>(batchSize, numHiddenNodes, numClasses, useBias));
     net.add(new nn::Softmax<>());
+    MeanSquaredError<float, 2> lossFunc;
+//    CrossEntropyLoss<float, 2> lossFunc;
+
+    int numEpoch = 100;
+    for (unsigned int ii = 0; ii < numEpoch; ++ii) {
+        auto result = net.forward<2, 2>(inputData);
+
+        auto loss = lossFunc.loss(result, labels);
+        auto lossGrad = lossFunc.backward(result, labels);
+//        auto accuracy = lossFunc.accuracy(result, labels);
+//        std::cout << "Epoch: " << ii << " Current loss: " << loss << " accuracy: " << accuracy << std::endl;
+         std::cout << "Epoch: " << ii << " Current Loss: " << loss << std::endl;
+        net.backward(lossGrad);
+        net.updateWeights(0.01);
+    }
 
     auto result = net.forward<2, 2>(inputData);
-    std::cout << result << std::endl;
+
+    for (unsigned int ii = 0; ii < result.dimensions()[0]; ++ii) {
+        std::cout << result(ii, 0) << ", " << result(ii, 1) << std::endl;
+    }
 
     return 0;
 }
