@@ -95,12 +95,15 @@ namespace nn {
         // TODO: Rethink how we want to init weights. Potentially use Eigen::internal::NormalRandomGenerator?
         // It should default to UniformRandomGenerator
         m_weights.setRandom();
+        m_weights = (m_weights - m_weights.constant(0.5));
+
         m_weightsGrad = Eigen::Tensor<Dtype, Dims>(inputDimension, outputDimension);
         m_weightsGrad.setZero();
 
         if (useBias) {
             m_bias = Eigen::Tensor<Dtype, Dims>(1, outputDimension);
             m_bias.setRandom();
+            m_bias = m_bias * m_bias.constant(0.01);
 
             m_biasGrad = Eigen::Tensor<Dtype, Dims>(1, outputDimension);
             m_biasGrad.setZero();
@@ -133,10 +136,15 @@ namespace nn {
         // So we want to contract along dimensions (0, 0), aka m_inputCache.T * accumulatedGrad
         // Where dimensions would be (inputDimension, batchSize) * (batchSize, outputDimension)
         static const Eigen::array<Eigen::IndexPair<int>, 1> transposeInput = { Eigen::IndexPair<int>(0, 0) };
+
         m_weightsGrad = m_inputCache.contract(accumulatedGrad, transposeInput);
+//        std::cout << "Input cache: " << m_inputCache << std::endl;
+//        std::cout << "Accumulated grad: " << accumulatedGrad << std::endl;
+//        std::cout << "Weights Grad: " << m_weightsGrad << std::endl << std::endl;
 
         if (m_useBias) {
             m_biasGrad = accumulatedGrad.sum(Eigen::array<int, 1>{0}).eval().reshape(Eigen::array<Eigen::Index, 2>{1, m_outputShape[1]});
+//            std::cout << "Bias Grad: " << m_biasGrad << std::endl << std::endl;
         }
 
         // accumulatedGrad is of shape (batchSize, outputDimensions)
@@ -149,9 +157,7 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     void Dense<Dtype, Dims>::updateWeights(float learningRate) {
-//        std::cout << "Weights before: " << m_weights << std::endl;
         m_weights -= m_weightsGrad.constant(learningRate) * m_weightsGrad;
-//        std::cout << "Weights after: " << m_weights << std::endl;
 
         if (m_useBias) {
             m_bias -= m_biasGrad.constant(learningRate) * m_biasGrad;

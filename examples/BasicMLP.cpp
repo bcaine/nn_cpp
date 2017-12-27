@@ -83,8 +83,6 @@ void writeDataset(const ToyLabeledData &data, const std::string &dataPath, const
 }
 
 int main() {
-    nn::Net<float> net;
-
     int firstClassSize = 50;
     int secondClassSize = 50;
     int batchSize = firstClassSize + secondClassSize;
@@ -97,7 +95,6 @@ int main() {
     labels.setZero();
 
     auto dataset = generateCircleData(firstClassSize, secondClassSize);
-    writeDataset(dataset, "/home/ben/Desktop/data.csv", "/home/ben/Desktop/labels.csv");
     int datasetSize = dataset.getSize();
     for (unsigned int ii = 0; ii < datasetSize; ++ii) {
         inputData(ii, 0) = dataset.data[ii].first;
@@ -109,34 +106,28 @@ int main() {
 
     int numHiddenNodes = 10;
     bool useBias = true;
+    nn::Net<float> net;
     net.add(new nn::Dense<>(batchSize, inputSize, numHiddenNodes, useBias));
     net.add(new nn::Relu<>());
     net.add(new nn::Dense<>(batchSize, numHiddenNodes, numHiddenNodes, useBias));
     net.add(new nn::Relu<>());
     net.add(new nn::Dense<>(batchSize, numHiddenNodes, numClasses, useBias));
     net.add(new nn::Softmax<>());
-    MeanSquaredError<float, 2> lossFunc;
-//    CrossEntropyLoss<float, 2> lossFunc;
+    CrossEntropyLoss<float, 2> lossFunc;
 
-    int numEpoch = 100;
+    int numEpoch = 1000;
+    float learningRate = 0.01;
     for (unsigned int ii = 0; ii < numEpoch; ++ii) {
+        // Forward
         auto result = net.forward<2, 2>(inputData);
-
         auto loss = lossFunc.loss(result, labels);
-        auto lossGrad = lossFunc.backward(result, labels);
-//        auto accuracy = lossFunc.accuracy(result, labels);
-//        std::cout << "Epoch: " << ii << " Current loss: " << loss << " accuracy: " << accuracy << std::endl;
-         std::cout << "Epoch: " << ii << " Current Loss: " << loss << std::endl;
-        net.backward(lossGrad);
-        net.updateWeights(0.01);
+        auto accuracy = lossFunc.accuracy(result, labels);
+        std::cout << "Epoch: " << ii << " Current loss: " << loss << " accuracy: " << accuracy << std::endl;
+
+        // Backprop
+        net.backward(lossFunc.backward(result, labels));
+        net.updateWeights(learningRate);
     }
-
-    auto result = net.forward<2, 2>(inputData);
-
-    for (unsigned int ii = 0; ii < result.dimensions()[0]; ++ii) {
-        std::cout << result(ii, 0) << ", " << result(ii, 1) << std::endl;
-    }
-
     return 0;
 }
 

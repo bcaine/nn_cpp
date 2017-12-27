@@ -75,8 +75,7 @@ namespace nn {
     Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad) {
         const int batchSize = accumulatedGrad.dimensions()[0];
         assert(batchSize == m_output.dimensions()[0] && "Dimensions of number of batches does not match");
-        return m_output * (m_output.constant(1.0) -  m_output);
-//        return (m_output * (accumulatedGrad * accumulatedGrad.constant(-1))) / accumulatedGrad.constant(batchSize);
+        return accumulatedGrad / accumulatedGrad.constant(batchSize);
     }
 }
 

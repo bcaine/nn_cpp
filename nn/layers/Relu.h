@@ -62,7 +62,9 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return input * (input >= static_cast<Dtype>(0)).template cast<Dtype>();
+        // TODO: Find out why Relu backwards is killing the MLP.
+        return input;
+//        return input * (input >= static_cast<Dtype>(0)).template cast<Dtype>();
     }
 }
 

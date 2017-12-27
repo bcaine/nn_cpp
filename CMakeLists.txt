@@ -28,6 +28,10 @@ if (NNCPP_BUILD_TESTS)
 endif()
 
 if (NNCPP_BUILD_EXAMPLES)
+
     add_executable(basic_mlp examples/BasicMLP.cpp)
     target_link_libraries(basic_mlp neural_net)
+
+    add_executable(iris_test examples/IrisTest.cpp)
+    target_link_libraries(iris_test neural_net)
 endif()
