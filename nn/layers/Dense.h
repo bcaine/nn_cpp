@@ -11,9 +11,10 @@
 #define NN_CPP_DENSE_H
 
 #include "layers/Layer.h"
-
+#include "utils/WeightInitializers.h"
 
 namespace nn {
+
     template <typename Dtype = float, int Dims = 2>
     class Dense : public Layer<Dtype, Dims> {
     public:
@@ -23,8 +24,10 @@ namespace nn {
          * @param inputDimension [in]: Expected input dimension
          * @param outputDimension [in]: The output dimensionality (number of neurons)
          * @param useBias [in]: Whether to use a bias term
+         * @param weightInitializer [in]: The weight initializer scheme to use. Defaults to GlorotUniform
          */
-        explicit Dense(int batchSize, int inputDimension, int outputDimension, bool useBias);
+        explicit Dense(int batchSize, int inputDimension, int outputDimension, bool useBias,
+                       InitializationScheme weightInitializer = InitializationScheme::GlorotUniform);
 
         /**
          * @brief Return the name of the layer
@@ -87,23 +90,18 @@ namespace nn {
     };
 
     template <typename Dtype, int Dims>
-    Dense<Dtype, Dims>::Dense(int batchSize, int inputDimension, int outputDimension, bool useBias):
+    Dense<Dtype, Dims>::Dense(int batchSize, int inputDimension, int outputDimension, bool useBias,
+                              InitializationScheme weightInitializer):
             m_outputShape({batchSize, outputDimension}),
             m_useBias(useBias)
     {
-        m_weights = Eigen::Tensor<Dtype, Dims>(inputDimension, outputDimension);
-        // TODO: Rethink how we want to init weights. Potentially use Eigen::internal::NormalRandomGenerator?
-        // It should default to UniformRandomGenerator
-        m_weights.setRandom();
-        m_weights = (m_weights - m_weights.constant(0.5));
+        m_weights = getRandomWeights<Dtype>(inputDimension, outputDimension, weightInitializer);
 
         m_weightsGrad = Eigen::Tensor<Dtype, Dims>(inputDimension, outputDimension);
         m_weightsGrad.setZero();
 
         if (useBias) {
-            m_bias = Eigen::Tensor<Dtype, Dims>(1, outputDimension);
-            m_bias.setRandom();
-            m_bias = m_bias * m_bias.constant(0.01);
+            m_bias = getRandomWeights<Dtype>(1, outputDimension, weightInitializer);
 
             m_biasGrad = Eigen::Tensor<Dtype, Dims>(1, outputDimension);
             m_biasGrad.setZero();
