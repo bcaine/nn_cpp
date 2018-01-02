@@ -40,10 +40,10 @@ namespace nn {
 
         /**
          * @brief Compute the gradient (backward pass) of the layer
-         * @param input [in]: The input to the backwards pass (from the next layer)
+         * @param accumulatedGrad [in]: The input to the backwards pass (from the next layer)
          * @return The output of the backwards pass (sent to the previous layer)
          */
-        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
+        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad);
 
         /**
          * @brief Void function in relu
@@ -57,18 +57,16 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::forward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return input.cwiseMax(static_cast<Dtype>(0));
+        m_output = input.cwiseMax(static_cast<Dtype>(0));
+        return m_output;
     };
 
     template <typename Dtype, int Dims>
-    Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        // TODO: Hack to keep the weights from dying
-        // For now we check if >= -0.01 so that slightly negative gradients work...
-        // This is sort of a mash up between Relu and Leaky Relu, but seems to be working pretty well
-        // on toy datasets.
-
-        auto ifAlmostPositive = input >= static_cast<Dtype>(-0.01);
-        return ifAlmostPositive.select(input, input.constant(0.0));
+    Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad) {
+        // Could also check a cached input to Relu::forward, but since
+        // the output is simply (x, 0), we can just check our already cached output.
+        auto inputPositive = m_output >= static_cast<Dtype>(0.0);
+        return inputPositive.select(accumulatedGrad, accumulatedGrad.constant(0.0));
     }
 }
 
