@@ -54,7 +54,7 @@ Dtype MeanSquaredError<Dtype, Dims>::loss(const Eigen::Tensor<Dtype, Dims> &pred
 template <typename Dtype, int Dims>
 Eigen::Tensor<Dtype, Dims> MeanSquaredError<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &predictions,
                                                                     const Eigen::Tensor<Dtype, Dims> &labels) {
-    return predictions.constant(-1.0) * (labels - predictions);
+    return predictions - labels;
 }
 
 #endif //NN_CPP_MEANSQUAREDERROR_H

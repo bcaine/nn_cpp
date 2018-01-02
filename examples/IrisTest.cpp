@@ -109,9 +109,6 @@ int main() {
         std::cout << "Epoch: " << ii << " loss: " << loss << " accuracy: " << accuracy << std::endl;
 
         auto lossBack = lossFunc.backward(result, labels);
-//        std::cout << "Result: " << result << std::endl;
-//        std::cout << "Loss Grad: " << std::endl;
-//        std::cout << lossBack << std::endl;
         net.backward(lossBack);
         net.updateWeights(learningRate);
     }
