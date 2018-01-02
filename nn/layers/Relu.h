@@ -62,9 +62,13 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        // TODO: Find out why Relu backwards is killing the MLP.
-        return input;
-//        return input * (input >= static_cast<Dtype>(0)).template cast<Dtype>();
+        // TODO: Hack to keep the weights from dying
+        // For now we check if >= -0.01 so that slightly negative gradients work...
+        // This is sort of a mash up between Relu and Leaky Relu, but seems to be working pretty well
+        // on toy datasets.
+
+        auto ifAlmostPositive = input >= static_cast<Dtype>(-0.01);
+        return ifAlmostPositive.select(input, input.constant(0.0));
     }
 }
 
