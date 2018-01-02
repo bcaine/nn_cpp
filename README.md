@@ -1,28 +1,29 @@
 ### nn_cpp - Minimalistic C++11 header only Neural Network Library
 
-**Not ready for use** Currently under active development, with several MVP features missing (see To Do subsection below)
+**Not ready for use** Currently under active development, with several MVP features missing (see Todo subsection below)
 
 We make heavy use of the [Eigen::Tensor](https://bitbucket.org/eigen/eigen/src/default/unsupported/Eigen/CXX11/src/Tensor/README.md) library for computation.
 
 The goal is to make a simple library to inline small neural networks in modern C++ code without the overhead of a major framework.
 
-### Requirements
+### Dependencies
 
 ```
 Eigen 3.3.4
 Boost
 ```
 
-### To Do
+### Todo
 Currently a ton of basic functionality that makes it worth using is missing
 
-- [] Saving and loading of weights
-- [] Support multi-core CPU usage, and GPU usage
-- [] Additional activation layers
-- [] Additional loss layers
-- [] Convolutions
-- [] Alternatives to gradient descent (SGD, Adam, etc)
-- [] Memory optimizations when test mode only
+- Saving and loading of weights
+- Support multi-core CPU usage, and GPU usage
+- Additional activation layers
+- Additional loss layers
+- Convolutions
+- Alternatives to gradient descent (SGD, Adam, etc)
+- Memory optimizations when test mode only
+- Add proper logging
 
 
 ### Building
@@ -40,8 +41,8 @@ make test
 ### Examples
 Currently, there are two very simple examples of training an MLP on some data.
 
-(BasicMLP.cpp)[./examples/BasicMLP.cpp] - A two class problem of classifying separable 2D uniformly distributed data (donut vs donut hole)
-(IrisTest.cpp)[./examples/IrisTest.cpp] - Classifying the Iris dataset with a simple MLP.
+[BasicMLP.cpp](./examples/BasicMLP.cpp) - A two class problem of classifying separable 2D uniformly distributed data (donut vs donut hole)
+[IrisTest.cpp](./examples/IrisTest.cpp) - Classifying the Iris dataset with a simple MLP.
 
 These are built if you do the following:
 
@@ -57,4 +58,8 @@ To run, simply run them via the binary.
 ```bash
 cd build
 ./bin/iris_test
+
+# Or, for the basic mlp test
+
+./bin/basic_mlp
 ```
