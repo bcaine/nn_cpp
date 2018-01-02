@@ -22,6 +22,15 @@ namespace nn {
         Softmax() = default;
 
         /**
+         * @brief Return the name of the layer
+         * @return The layer name
+         */
+        const std::string& getName() {
+            const static std::string name = "Softmax";
+            return name;
+        }
+
+        /**
          * @brief Forward through the layer (compute the output)
          * @param input [in]: The input tensor to apply softmax to
          * @return
@@ -30,12 +39,20 @@ namespace nn {
 
         /**
          * @brief Compute the gradient (backwards pass) of the layer
-         * @param input [in]: The input tensor to the backwards pass (from the next layer)
+         * @param accumulatedGrad [in]: The input tensor to the backwards pass (from the next layer). This should be one hot encoded labels
          * @return The output of the backwards pass (sent ot the previous layer)
          */
-        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
+        Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad);
+
+        /**
+         * @brief Update Weights (doesn't do anything w/ softmax)
+         */
+        void updateWeights(float learningRate) {}
 
         void printOutputShape() {}
+
+    private:
+        Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };
 
     template <typename Dtype, int Dims>
@@ -47,15 +64,18 @@ namespace nn {
                                     .broadcast(Eigen::array<int, 2>{1, classDims});
 
         auto exponentiated = shiftedInput.exp();
-        return exponentiated * exponentiated.sum(Eigen::array<int, 1>{1})
-                               .inverse().eval()
-                               .reshape(Eigen::array<int, 2>({batchSize, 1}))
-                               .broadcast(Eigen::array<int, 2>({1, classDims}));
+        m_output = exponentiated * exponentiated.sum(Eigen::array<int, 1>{1})
+                                   .inverse().eval()
+                                   .reshape(Eigen::array<int, 2>({batchSize, 1}))
+                                   .broadcast(Eigen::array<int, 2>({1, classDims}));
+        return m_output;
     }
 
     template <typename Dtype, int Dims>
-    Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return input;
+    Eigen::Tensor<Dtype, Dims> Softmax<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad) {
+        const int batchSize = accumulatedGrad.dimensions()[0];
+        assert(batchSize == m_output.dimensions()[0] && "Dimensions of number of batches does not match");
+        return accumulatedGrad / accumulatedGrad.constant(batchSize);
     }
 }
 

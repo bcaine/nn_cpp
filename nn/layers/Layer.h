@@ -18,7 +18,12 @@ namespace nn {
     class Layer {
     public:
         /**
-         * Take an input tensor, perform an operation on it, and return a new tensor
+         * @brief Return the name of the layer
+         */
+        virtual const std::string& getName() = 0;
+
+        /**
+         * @brief Take an input tensor, perform an operation on it, and return a new tensor
          * @param input [in]: The input tensor (from the previous layer)
          * @return An output tensor, which is fed into the next layer
          */
@@ -30,6 +35,12 @@ namespace nn {
          * @return The output tensor, which is fed into the previous layer
          */
         virtual Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &output) = 0;
+
+        /**
+         * @brief Update the weights after a backwards pass
+         * @param learningRate [in]: Amount to update the weights by
+         */
+        virtual void updateWeights(float learningRate) = 0;
 
         // TODO: There has to be a better way to do this
         virtual void printOutputShape() = 0;

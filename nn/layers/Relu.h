@@ -23,6 +23,15 @@ namespace nn {
         Relu() = default;
 
         /**
+         * @brief Return the name of the layer
+         * @return The layer name
+         */
+        const std::string& getName() {
+            const static std::string name = "Relu";
+            return name;
+        }
+
+        /**
          * @brief Forward through the layer (compute the output)
          * @param input [in]: The input tensor to apply Relu to
          * @return max(0, input)
@@ -36,7 +45,14 @@ namespace nn {
          */
         Eigen::Tensor<Dtype, Dims> backward(const Eigen::Tensor<Dtype, Dims> &input);
 
+        /**
+         * @brief Void function in relu
+         */
+        void updateWeights(float learningRate) {}
+
         void printOutputShape() {}
+    private:
+        Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };
 
     template <typename Dtype, int Dims>
@@ -46,7 +62,9 @@ namespace nn {
 
     template <typename Dtype, int Dims>
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &input) {
-        return (input > static_cast<Dtype>(0)).template cast<Dtype>();
+        // TODO: Find out why Relu backwards is killing the MLP.
+        return input;
+//        return input * (input >= static_cast<Dtype>(0)).template cast<Dtype>();
     }
 }
 

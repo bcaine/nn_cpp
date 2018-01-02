@@ -10,12 +10,10 @@
 #ifndef NN_CPP_NET_H
 #define NN_CPP_NET_H
 
-#include "layers/Layer.h"
-// TODO: Move to an easy to import layers
-#include "layers/Dense.h"
-#include "layers/Relu.h"
-#include "layers/Softmax.h"
+#include "layers/Layers.h"
 #include <vector>
+#include <memory>
+
 
 namespace nn {
 
@@ -37,11 +35,37 @@ namespace nn {
                 return {};
             }
 
+            // TODO: How to ensure each forward call returns a lazily evaluated expression instead of a Tensor
+            // That way we can use this to autogenerate the evaluation chain for efficiency.
+            // Right now it seems to evaluate each layer individually.
             auto currentInput = input;
             for (const auto &layer : m_layers) {
                 currentInput = layer->forward(currentInput);
             }
             return currentInput;
+        }
+
+        template <int labelDims>
+        void backward(Eigen::Tensor<Dtype, labelDims> input) {
+            if (m_layers.empty()) {
+                std::cerr << "No layers specified" << std::endl;
+                return;
+            }
+
+            auto accumulatedGrad = input;
+            for (auto rit = m_layers.rbegin(); rit != m_layers.rend(); ++rit) {
+                accumulatedGrad = (*rit)->backward(accumulatedGrad);
+            }
+        }
+
+        /**
+         * @brief Update weights for each layer
+         * @param learningRate [in]: Learning rate with amount to update
+         */
+        void updateWeights(float learningRate) {
+            for (auto &layer : m_layers) {
+                layer->updateWeights(learningRate);
+            }
         }
 
         /**

@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(nn_cpp CXX)
 include_directories(nn)
 
 set(CMAKE_CXX_STANDARD 11)
 option(NNCPP_BUILD_TESTS "Whether to build the tests" ON)
+option(NNCPP_BUILD_EXAMPLES "Whether to build examples" ON)
 
 file(GLOB_RECURSE nn_sources nn/*.h)
 add_library(neural_net ${nn_sources})
@@ -24,4 +25,13 @@ if (NNCPP_BUILD_TESTS)
         target_link_libraries(neural_net_test ${Boost_LIBRARIES} neural_net)
         add_test(NAME neural_net_test WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND neural_net_test)
     endif()
+endif()
+
+if (NNCPP_BUILD_EXAMPLES)
+
+    add_executable(basic_mlp examples/BasicMLP.cpp)
+    target_link_libraries(basic_mlp neural_net)
+
+    add_executable(iris_test examples/IrisTest.cpp)
+    target_link_libraries(iris_test neural_net)
 endif()

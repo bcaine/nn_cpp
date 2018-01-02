@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_relu_back) {
 
     Eigen::Tensor<float, 2> result = relu.backward(input);
 
-    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 1, 1, 1, 1});
+    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 3, 5, 7, 10});
     for (unsigned ii = 0; ii < dim2; ++ii) {
         BOOST_REQUIRE_MESSAGE(result(0, ii) == expectedOutput[ii], "Output of relu.backward did not match");
     }
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_softmax) {
         sum += result2(0, ii);
     }
 
-    BOOST_REQUIRE_CLOSE(sum, 1.0, 1e-5);
+    BOOST_REQUIRE_CLOSE(sum, 1.0, 1e-3);
 }
 
 BOOST_AUTO_TEST_CASE(test_softmax_back) {
@@ -100,12 +100,18 @@ BOOST_AUTO_TEST_CASE(test_softmax_back) {
 
     int inputBatchSize = 2;
     Eigen::Tensor<float, 2> input(inputBatchSize, 2);
-    input.setValues({{5, 5},
+    input.setValues({{5, 7},
                      {-100, 100}});
 
-    std::cout << input << std::endl;
-    Eigen::Tensor<float, 2> result = softmax.backward(input);
-    std::cout << result << std::endl;
+    Eigen::Tensor<float, 2> result = softmax.forward(input);
+
+    Eigen::Tensor<float, 2> labels(inputBatchSize, 2);
+    labels.setValues({{0, 1},
+                      {0, 1}});
+
+    // Already has state from forward
+    Eigen::Tensor<float, 2> backwardsResult = softmax.backward(labels);
+    // TODO: Add actual tests. Test against TF/Pytorch?
 }
 
 BOOST_AUTO_TEST_CASE(test_net1) {
@@ -115,8 +121,8 @@ BOOST_AUTO_TEST_CASE(test_net1) {
     // TODO: output of previous should match input of next. Can we auto-infer in some nice way?
     int batchSize = 1;
     net.add(new nn::Dense<float, 2>(batchSize, 28 * 28, 100, true))
-            .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
-            .add(new nn::Dense<float, 2>(batchSize, 100, 10, true));
+       .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
+       .add(new nn::Dense<float, 2>(batchSize, 100, 10, true));
 
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
@@ -127,20 +133,21 @@ BOOST_AUTO_TEST_CASE(test_net1) {
 
 BOOST_AUTO_TEST_CASE(test_net2) {
     std::cout << "Testing net creation" << std::endl;
-    nn::Net<float> net;
+    nn::Net<> net;
 
     int batchSize = 64;
     int inputX = 28;
     int inputY = 28;
-
+    int numClasses = 10;
+    bool useBias = true;
     // Basic MLP for testing MNSIT
-    net.add(new nn::Dense<float, 2>(batchSize, inputX * inputY, 100, true))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 100, true))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Dense<float, 2>(batchSize, 100, 10, true))
-       .add(new nn::Relu<float, 2>())
-       .add(new nn::Softmax<float, 2>());
+    net.add(new nn::Dense<>(batchSize, inputX * inputY, 100, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Dense<>(batchSize, 100, 100, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Dense<>(batchSize, 100, 10, useBias))
+       .add(new nn::Relu<>())
+       .add(new nn::Softmax<>());
 
     Eigen::Tensor<float, 2> input(batchSize, 28 * 28);
     input.setRandom();
@@ -150,5 +157,13 @@ BOOST_AUTO_TEST_CASE(test_net2) {
     auto endTime = std::chrono::system_clock::now();
 
     std::chrono::duration<double> duration = endTime - startTime;
-    std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s" << std::endl;
+    std::cout << "A single forward of size: [" << batchSize << ", 28, 28] took: " << duration.count() << "s"
+              << std::endl;
+
+    Eigen::Tensor<float, 2> fakeLabels(batchSize, numClasses);
+    fakeLabels.setZero();
+    fakeLabels.setValues({{0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+                          {0, 1, 0, 0, 0, 0, 0, 0, 0, 1}});
+
+    net.backward<2>(fakeLabels);
 }
