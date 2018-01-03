@@ -54,14 +54,15 @@ BOOST_AUTO_TEST_CASE(test_relu_back) {
     Eigen::Tensor<float, 2> input(dim1, dim2);
     input.setValues({{-10, -7, -5, -3, 0, 1, 3, 5, 7, 10}});
 
-    Eigen::Tensor<float, 2> result = relu.backward(input);
+    Eigen::Tensor<float, 2> accumulatedGrad(dim1, dim2);
+    accumulatedGrad.setValues({{1, -4, 7, -10, 13, -16, 19, -22, 25, -28}});
 
-    // TODO: If this test covered the input space better, it would fail.
-    // See TODO in Relu::backward, where we have a hack to prevent the Relu
-    // layer from killing the gradient
-    std::vector<float> expectedOutput({0, 0, 0, 0, 0, 1, 3, 5, 7, 10});
+    Eigen::Tensor<float, 2> forwardResult = relu.forward(input);
+    Eigen::Tensor<float, 2> backwardResult = relu.backward(accumulatedGrad);
+
+    std::vector<float> expectedOutput({0, 0, 0, 0, 0, -16, 19, -22, 25, -28});
     for (unsigned ii = 0; ii < dim2; ++ii) {
-        BOOST_REQUIRE_MESSAGE(result(0, ii) == expectedOutput[ii], "Output of relu.backward did not match");
+        BOOST_REQUIRE_MESSAGE(backwardResult(0, ii) == expectedOutput[ii], "Output of relu.backward did not match");
     }
 }
 

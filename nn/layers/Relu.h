@@ -65,7 +65,7 @@ namespace nn {
     Eigen::Tensor<Dtype, Dims> Relu<Dtype, Dims>::backward(const Eigen::Tensor<Dtype, Dims> &accumulatedGrad) {
         // Could also check a cached input to Relu::forward, but since
         // the output is simply (x, 0), we can just check our already cached output.
-        auto inputPositive = m_output >= static_cast<Dtype>(0.0);
+        auto inputPositive = m_output > static_cast<Dtype>(0);
         return inputPositive.select(accumulatedGrad, accumulatedGrad.constant(0.0));
     }
 }
