@@ -171,3 +171,22 @@ BOOST_AUTO_TEST_CASE(test_net2) {
 
     net.backward<2>(fakeLabels);
 }
+
+BOOST_AUTO_TEST_CASE(test_regression) {
+    std::cout << "Testing linear regression" << std::endl;
+    nn::Net<> net;
+
+    net.add(new nn::Dense<float, 2>(1, 1, 10, true));
+    net.add(new nn::Relu<float, 2>());
+    net.add(new nn::Dense<float, 2>(1, 10, 1, true));
+
+    Eigen::Tensor<float, 2> input(1, 1);
+    input.setRandom();
+
+    auto startTime = std::chrono::system_clock::now();
+    auto result = net.forward<2, 2>(input);
+    auto endTime = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> duration = endTime - startTime;
+    std::cout << "Regression took: " << duration.count() << "s" << std::endl;
+}

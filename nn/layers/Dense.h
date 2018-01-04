@@ -136,13 +136,8 @@ namespace nn {
         static const Eigen::array<Eigen::IndexPair<int>, 1> transposeInput = { Eigen::IndexPair<int>(0, 0) };
 
         m_weightsGrad = m_inputCache.contract(accumulatedGrad, transposeInput);
-//        std::cout << "Input cache: " << m_inputCache << std::endl;
-//        std::cout << "Accumulated grad: " << accumulatedGrad << std::endl;
-//        std::cout << "Weights Grad: " << m_weightsGrad << std::endl << std::endl;
-
         if (m_useBias) {
             m_biasGrad = accumulatedGrad.sum(Eigen::array<int, 1>{0}).eval().reshape(Eigen::array<Eigen::Index, 2>{1, m_outputShape[1]});
-//            std::cout << "Bias Grad: " << m_biasGrad << std::endl << std::endl;
         }
 
         // accumulatedGrad is of shape (batchSize, outputDimensions)

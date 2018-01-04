@@ -73,7 +73,11 @@ namespace nn {
          * @param layer [in]: A layer to add
          * @return A reference to *this for method chaining
          */
-        Net<Dtype>& add(std::unique_ptr<Layer<Dtype>> layer);
+        template <int Dims>
+        Net<Dtype>& add(std::unique_ptr<Layer<Dtype, Dims>> layer) {
+            m_layers.push_back(layer);
+            return *this;
+        }
 
         /**
          * Add a dense layer
@@ -83,7 +87,7 @@ namespace nn {
         template <int Dims>
         Net<Dtype>& add(Dense<Dtype, Dims> *denseLayer) {
             // Do shape checks here
-            m_layers.push_back(std::unique_ptr<Layer<Dtype>>(denseLayer));
+            m_layers.push_back(std::unique_ptr<Layer<Dtype, Dims>>(denseLayer));
             return *this;
         }
 
@@ -94,7 +98,7 @@ namespace nn {
          */
         template <int Dims>
         Net<Dtype>& add(Relu<Dtype, Dims> *reluLayer) {
-            m_layers.push_back(std::unique_ptr<Layer<Dtype>>(reluLayer));
+            m_layers.push_back(std::unique_ptr<Layer<Dtype, Dims>>(reluLayer));
             return *this;
         }
 
@@ -105,7 +109,7 @@ namespace nn {
          */
         template <int Dims>
         Net<Dtype>& add(Softmax<Dtype, Dims> *softmaxLayer) {
-            m_layers.push_back(std::unique_ptr<Layer<Dtype>>(softmaxLayer));
+            m_layers.push_back(std::unique_ptr<Layer<Dtype, Dims>>(softmaxLayer));
             return *this;
         }
 
@@ -114,13 +118,6 @@ namespace nn {
     private:
         std::vector<std::unique_ptr<Layer<Dtype>>> m_layers; ///< A vector of all our layers
     };
-
-    template <typename Dtype>
-    Net<Dtype>& Net<Dtype>::add(std::unique_ptr<Layer<Dtype>> layer) {
-        // TODO: Do check about dimensions?
-        m_layers.push_back(layer);
-        return *this;
-    }
 
     template <typename Dtype>
     void Net<Dtype>::printShapes() {
