@@ -48,9 +48,13 @@ namespace nn {
         /**
          * @brief Void function in relu
          */
-        void updateWeights(float learningRate) {}
+        void step() {}
 
-        void printOutputShape() {}
+        /**
+         * @brief Void function in relu
+         */
+        void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) {}
+
     private:
         Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };

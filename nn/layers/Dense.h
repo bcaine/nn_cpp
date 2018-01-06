@@ -61,32 +61,29 @@ namespace nn {
             return m_outputShape;
         };
 
-
         /**
          * @brief Update weights of the layer w.r.t. gradient
-         * @param learningRate [in]: Rate of change of gradient
          */
-        void updateWeights(float learningRate);
+        void step();
 
-        void printOutputShape() {
-            std::cout << "[ ";
-            for (const auto &dim : m_outputShape) {
-                std::cout << dim << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
+        /**
+         * @brief Set up the optimizer for our weights
+         */
+        void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer);
 
     private:
-        Eigen::array<Eigen::Index, Dims> m_outputShape; ///< The output shape of this layer
-        Eigen::Tensor<Dtype, Dims> m_inputCache;        ///< Cache the input to calculate gradient
-        Eigen::Tensor<Dtype, Dims> m_weights;           ///< Our weights of the layer
-        Eigen::Tensor<Dtype, Dims> m_bias;              ///< The bias weights if specified
+        Eigen::array<Eigen::Index, Dims> m_outputShape;                ///< The output shape of this layer
+        Eigen::Tensor<Dtype, Dims> m_inputCache;                       ///< Cache the input to calculate gradient
+        Eigen::Tensor<Dtype, Dims> m_weights;                          ///< Our weights of the layer
+        Eigen::Tensor<Dtype, Dims> m_bias;                             ///< The bias weights if specified
 
         // Gradients
-        Eigen::Tensor<Dtype, Dims> m_weightsGrad;       ///< The gradient of the weights
-        Eigen::Tensor<Dtype, Dims> m_biasGrad;          ///< The gradient of the bias
+        Eigen::Tensor<Dtype, Dims> m_weightsGrad;                      ///< The gradient of the weights
+        Eigen::Tensor<Dtype, Dims> m_biasGrad;                         ///< The gradient of the bias
+        std::unique_ptr<OptimizerImpl<Dtype, Dims>> m_weightOptimizer; ///< The optimizer of our weights
+        std::unique_ptr<OptimizerImpl<Dtype, Dims>> m_biasOptimizer;   ///< The optimizer of our bias
 
-        bool m_useBias;                                 ///< Whether we use the bias
+        bool m_useBias;                                                ///< Whether we use the bias
     };
 
     template <typename Dtype, int Dims>
@@ -149,11 +146,20 @@ namespace nn {
     }
 
     template <typename Dtype, int Dims>
-    void Dense<Dtype, Dims>::updateWeights(float learningRate) {
-        m_weights -= m_weightsGrad.constant(learningRate) * m_weightsGrad;
+    void Dense<Dtype, Dims>::step() {
+        m_weights -= m_weightOptimizer->weightUpdate(m_weightsGrad);
 
         if (m_useBias) {
-            m_bias -= m_biasGrad.constant(learningRate) * m_biasGrad;
+            m_bias -= m_biasOptimizer->weightUpdate(m_biasGrad);
+        }
+    }
+
+    template <typename Dtype, int Dims>
+    void Dense<Dtype, Dims>::registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) {
+        m_weightOptimizer = std::move(optimizer->template createOptimizer<Dims>());
+
+        if (m_useBias) {
+            m_biasOptimizer = std::move(std::move(optimizer->template createOptimizer<Dims>()));
         }
     }
 }

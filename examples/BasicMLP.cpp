@@ -113,10 +113,11 @@ int main() {
     net.add(new nn::Relu<>());
     net.add(new nn::Dense<>(batchSize, numHiddenNodes, numClasses, useBias));
     net.add(new nn::Softmax<>());
-    CrossEntropyLoss<float, 2> lossFunc;
+
+    nn::CrossEntropyLoss<float, 2> lossFunc;
+    net.registerOptimizer(new nn::StochasticGradientDescent<float>(0.01));
 
     int numEpoch = 1000;
-    float learningRate = 0.01;
     for (unsigned int ii = 0; ii < numEpoch; ++ii) {
         // Forward
         auto result = net.forward<2, 2>(inputData);
@@ -126,7 +127,7 @@ int main() {
 
         // Backprop
         net.backward(lossFunc.backward(result, labels));
-        net.updateWeights(learningRate);
+        net.step();
     }
     return 0;
 }

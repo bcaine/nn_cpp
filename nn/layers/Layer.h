@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <unsupported/Eigen/CXX11/Tensor>
+#include "optimizers/Optimizers.h"
 
 namespace nn {
     template <typename Dtype = float, int Dims = 2>
@@ -38,12 +39,14 @@ namespace nn {
 
         /**
          * @brief Update the weights after a backwards pass
-         * @param learningRate [in]: Amount to update the weights by
          */
-        virtual void updateWeights(float learningRate) = 0;
+        virtual void step() = 0;
 
-        // TODO: There has to be a better way to do this
-        virtual void printOutputShape() = 0;
+        /**
+         * @brief Registers the optimizer with the layer
+         * @param optimizer [in]: The optimizer to register
+         */
+        virtual void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) = 0;
     };
 }
 

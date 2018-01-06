@@ -47,9 +47,12 @@ namespace nn {
         /**
          * @brief Update Weights (doesn't do anything w/ softmax)
          */
-        void updateWeights(float learningRate) {}
+        void step() {}
 
-        void printOutputShape() {}
+        /**
+         * @brief Void function in softmax
+         */
+        void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) {}
 
     private:
         Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass

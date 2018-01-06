@@ -11,6 +11,9 @@
 #define NN_CPP_NET_H
 
 #include "layers/Layers.h"
+#include "loss/Losses.h"
+#include "optimizers/Optimizers.h"
+
 #include <vector>
 #include <memory>
 
@@ -52,19 +55,30 @@ namespace nn {
                 return;
             }
 
+            if (!m_optimizer) {
+                std::cerr << "No optimizer specified" << std::endl;
+                return;
+            }
+
             auto accumulatedGrad = input;
             for (auto rit = m_layers.rbegin(); rit != m_layers.rend(); ++rit) {
                 accumulatedGrad = (*rit)->backward(accumulatedGrad);
             }
         }
 
+        void registerOptimizer(nn::StochasticGradientDescent<Dtype> *optimizer) {
+            m_optimizer.reset(optimizer);
+            for (auto &layer : m_layers) {
+                layer->registerOptimizer(m_optimizer);
+            }
+        }
+
         /**
          * @brief Update weights for each layer
-         * @param learningRate [in]: Learning rate with amount to update
          */
-        void updateWeights(float learningRate) {
+        void step() {
             for (auto &layer : m_layers) {
-                layer->updateWeights(learningRate);
+                layer->step();
             }
         }
 
@@ -113,22 +127,11 @@ namespace nn {
             return *this;
         }
 
-        void printShapes();
 
     private:
         std::vector<std::unique_ptr<Layer<Dtype>>> m_layers; ///< A vector of all our layers
+        std::shared_ptr<StochasticGradientDescent<Dtype>> m_optimizer;       ///< Our optimizer
     };
-
-    template <typename Dtype>
-    void Net<Dtype>::printShapes() {
-        int layerNum = 0;
-        for (const auto &layer : m_layers) {
-            std::cout << "Layer " << layerNum << " Output Shape: ";
-            layer->printOutputShape();
-            std::cout << std::endl;
-            layerNum ++;
-        }
-    }
 }
 
 #endif //NN_CPP_NET_H
