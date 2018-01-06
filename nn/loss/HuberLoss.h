@@ -47,11 +47,10 @@ namespace nn {
     Dtype HuberLoss<Dtype, Dims>::loss(const Eigen::Tensor<Dtype, Dims> &predictions,
                                               const Eigen::Tensor<Dtype, Dims> &labels) {
         assert(predictions.dimensions()[0] == labels.dimensions()[0] &&
-               "SmoothL1Loss::loss dimensions don't match");
+               "HuberLoss::loss dimensions don't match");
         assert(predictions.dimensions()[1] == labels.dimensions()[1] &&
-               "SmoothL1Loss::loss dimensions don't match");
-
-        int numClasses = predictions.dimensions()[1];
+               "HuberLoss::loss dimensions don't match");
+        int batchSize = predictions.dimensions()[0];
         // Definition taken from: https://en.wikipedia.org/wiki/Huber_loss
 
         // Precalculate y_hat - y
@@ -72,7 +71,7 @@ namespace nn {
 
         Eigen::Tensor<Dtype, 0> sum = perItemLoss.sum();
         // Sum and divide by N
-        return sum(0) / numClasses;
+        return sum(0) / batchSize;
     }
 
     template<typename Dtype, int Dims>
@@ -80,7 +79,10 @@ namespace nn {
                                                                        const Eigen::Tensor<Dtype, Dims> &labels) {
 
         auto error = predictions - labels;
-        return m_cachedSwitchResults.select(error, error.constant(m_threshold));
+
+        // TODO: Can simplify algebra? Doesn't this just equate to m_threshold * sgn(error)?
+        auto absoluteErrorGrad = error.constant(m_threshold) * (error / error.abs());
+        return m_cachedSwitchResults.select(error, absoluteErrorGrad);
     }
 }
 

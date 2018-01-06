@@ -48,10 +48,9 @@ namespace nn {
                "MeanSquaredError::loss dimensions don't match");
 
         int batchSize = predictions.dimensions()[0];
-        int numClasses = predictions.dimensions()[1];
 
         Eigen::Tensor<Dtype, 0> squaredSum = (predictions - labels).square().sum();
-        return squaredSum(0) / numClasses;
+        return squaredSum(0) / batchSize;
     }
 
     template<typename Dtype, int Dims>

@@ -41,7 +41,6 @@ BOOST_AUTO_TEST_CASE(test_cross_entropy_loss) {
     auto loss = lossFunction.loss(predictions, labels);
     auto accuracy = lossFunction.accuracy(predictions, labels);
     auto backwardsResult = lossFunction.backward(predictions, labels);
-    std::cout << "Loss : " << loss << " accuracy: " << accuracy << std::endl;
     BOOST_REQUIRE_MESSAGE(accuracy == 0.75, "Accuracy was not correct");
 }
 
@@ -57,10 +56,10 @@ BOOST_AUTO_TEST_CASE(test_mse_loss) {
     labels.setValues({{2}, {1}, {3}, {0}});
 
     // Expected squared error of each should be:
-    // 0^2 + 2^2 + 1^2 + 5^2 = 0 + 4 + 1 + 25 = 30
+    // 0^2 + 2^2 + 1^2 + 5^2 = 0 + 4 + 1 + 25 = 30 / 4 = 7.5
 
     auto loss = lossFunction.loss(predictions, labels);
-    BOOST_REQUIRE_MESSAGE(loss == 30.0, "Loss not what was expected");
+    BOOST_REQUIRE_MESSAGE(loss == 7.5, "Loss not what was expected");
 
     auto backwardsResult = lossFunction.backward(predictions, labels);
     std::array<float, batchSize> expectedBackwardsResults = {0, 2, 1, 5};
@@ -87,10 +86,10 @@ BOOST_AUTO_TEST_CASE(test_huber_loss) {
     // So, we expect:
     // 0.5 * 0^2 + (1.5 * 2 - 0.5 * 1.5^2) + 0.5 * 1^2 + (1.5 * 5 - 0.5 * 1.5^2)
     // Which is:
-    // [0, 1.875, 0.5, 6.375] = 8.75
+    // [0, 1.875, 0.5, 6.375] = 8.75 / 4 = 2.1875
 
     auto loss = lossFunction.loss(predictions, labels);
-    BOOST_REQUIRE_CLOSE(loss, 8.75, 1e-3);
+    BOOST_REQUIRE_CLOSE(loss, 2.1875, 1e-3);
 
     auto backwardsResult = lossFunction.backward(predictions, labels);
 
