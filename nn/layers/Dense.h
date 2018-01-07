@@ -121,8 +121,8 @@ namespace nn {
         auto result = input.contract(m_weights, productDims);
 
         if (m_useBias) {
-            // Copy the bias from (1, outputSize) to (batchDimension, outputDimension)
-            return result + m_bias.broadcast(Eigen::array<Eigen::Index, 2>{m_outputShape[0], 1});
+            // Copy the bias from (1, outputSize) to (inputBatchSize, outputDimension)
+            return result + m_bias.broadcast(Eigen::array<Eigen::Index, 2>{input.dimensions()[0], 1});
         } else {
             return result;
         }
