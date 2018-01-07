@@ -54,6 +54,11 @@ namespace nn {
          */
         void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) {}
 
+        /**
+         * @brief Void function in softmax
+         */
+        void registerOptimizer(std::shared_ptr<Adam<Dtype>> optimizer) {}
+
     private:
         Eigen::Tensor<Dtype, Dims> m_output; ///< The output of the forward pass
     };

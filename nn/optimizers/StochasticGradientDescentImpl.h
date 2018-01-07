@@ -7,8 +7,8 @@
  * @author Ben Caine
  */
 
-#ifndef NNCPP_STOCHASTICGRADIENTDESCENT_IMPL_H
-#define NNCPP_STOCHASTICGRADIENTDESCENT_IMPL_H
+#ifndef NN_CPP_STOCHASTICGRADIENTDESCENT_IMPL_H
+#define NN_CPP_STOCHASTICGRADIENTDESCENT_IMPL_H
 
 #include "OptimizerImpl.h"
 
@@ -26,8 +26,13 @@ namespace nn {
             explicit StochasticGradientDescentImpl(Dtype learningRate):
                     m_learningRate(learningRate) {}
 
-            Eigen::Tensor<Dtype, Dims> weightUpdate(const Eigen::Tensor<Dtype, Dims> &weights) {
-                return weights * weights.constant(m_learningRate);
+            /**
+             * @brief Get the update to apply to the weights
+             * @param gradWeights [in]: Weights to update
+             * @return The factor to update the weights by
+             */
+            Eigen::Tensor<Dtype, Dims> weightUpdate(const Eigen::Tensor<Dtype, Dims> &gradWeights) {
+                return gradWeights * gradWeights.constant(m_learningRate);
             };
 
         private:
@@ -36,4 +41,4 @@ namespace nn {
     }
 }
 
-#endif //NNCPP_STOCHASTICGRADIENTDESCENT_IMPL_H
+#endif //NN_CPP_STOCHASTICGRADIENTDESCENT_IMPL_H

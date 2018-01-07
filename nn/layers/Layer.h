@@ -42,11 +42,19 @@ namespace nn {
          */
         virtual void step() = 0;
 
+        // TODO: Need to find a clean way to inherit optimizers to reduce repetition
+        // TODO: If anyone is reading this, and has ideas... please let me know virtual methods w/ templates is impossible :(
         /**
          * @brief Registers the optimizer with the layer
          * @param optimizer [in]: The optimizer to register
          */
         virtual void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) = 0;
+
+        /**
+         * @brief Registers the optimizer with the layer
+         * @param optimizer [in]: The optimizer to register
+         */
+        virtual void registerOptimizer(std::shared_ptr<Adam<Dtype>> optimizer) = 0;
     };
 }
 

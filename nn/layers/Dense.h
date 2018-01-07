@@ -66,10 +66,16 @@ namespace nn {
          */
         void step();
 
+        // TODO: Find a nicer way then duplication for subtype optimizer factories
         /**
          * @brief Set up the optimizer for our weights
          */
         void registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer);
+
+        /**
+         * @brief Set up the optimizer for our weights
+         */
+        void registerOptimizer(std::shared_ptr<Adam<Dtype>> optimizer);
 
     private:
         Eigen::array<Eigen::Index, Dims> m_outputShape;                ///< The output shape of this layer
@@ -154,13 +160,24 @@ namespace nn {
         }
     }
 
+    // TODO: Find a nicer way then duplication for subtype optimizer factories
     template <typename Dtype, int Dims>
     void Dense<Dtype, Dims>::registerOptimizer(std::shared_ptr<StochasticGradientDescent<Dtype>> optimizer) {
         m_weightOptimizer = std::move(optimizer->template createOptimizer<Dims>());
 
         if (m_useBias) {
-            m_biasOptimizer = std::move(std::move(optimizer->template createOptimizer<Dims>()));
+            m_biasOptimizer = std::move(optimizer->template createOptimizer<Dims>());
         }
+    }
+
+    template <typename Dtype, int Dims>
+    void Dense<Dtype, Dims>::registerOptimizer(std::shared_ptr<Adam<Dtype>> optimizer) {
+        m_weightOptimizer = std::move(optimizer->template createOptimizer<Dims>());
+
+        if (m_useBias) {
+            m_biasOptimizer = std::move(optimizer->template createOptimizer<Dims>());
+        }
+
     }
 }
 #endif //NN_CPP_DENSE_H

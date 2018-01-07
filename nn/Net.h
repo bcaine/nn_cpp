@@ -50,13 +50,13 @@ namespace nn {
 
         template <int labelDims>
         void backward(Eigen::Tensor<Dtype, labelDims> input) {
-            if (m_layers.empty()) {
-                std::cerr << "No layers specified" << std::endl;
+            if (!m_hasOptimizer) {
+                std::cerr << "No registered optimizer" << std::endl;
                 return;
             }
 
-            if (!m_optimizer) {
-                std::cerr << "No optimizer specified" << std::endl;
+            if (m_layers.empty()) {
+                std::cerr << "No layers specified" << std::endl;
                 return;
             }
 
@@ -67,9 +67,20 @@ namespace nn {
         }
 
         void registerOptimizer(nn::StochasticGradientDescent<Dtype> *optimizer) {
-            m_optimizer.reset(optimizer);
+            m_hasOptimizer = true;
+            // TODO: Pulled this out of a private member var cause I can't supertype
+            std::shared_ptr<nn::StochasticGradientDescent<Dtype>> optimizerPtr(optimizer);
             for (auto &layer : m_layers) {
-                layer->registerOptimizer(m_optimizer);
+                layer->registerOptimizer(optimizerPtr);
+            }
+        }
+
+        void registerOptimizer(nn::Adam<Dtype> *optimizer) {
+            m_hasOptimizer = true;
+            // TODO: Pulled this out of a private member var cause I can't supertype
+            std::shared_ptr<nn::Adam<Dtype>> optimizerPtr(optimizer);
+            for (auto &layer : m_layers) {
+                layer->registerOptimizer(optimizerPtr);
             }
         }
 
@@ -130,7 +141,7 @@ namespace nn {
 
     private:
         std::vector<std::unique_ptr<Layer<Dtype>>> m_layers; ///< A vector of all our layers
-        std::shared_ptr<StochasticGradientDescent<Dtype>> m_optimizer;       ///< Our optimizer
+        bool m_hasOptimizer;                                 ///< An optimizer has been added to the net
     };
 }
 

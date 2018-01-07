@@ -115,9 +115,9 @@ int main() {
     net.add(new nn::Softmax<>());
 
     nn::CrossEntropyLoss<float, 2> lossFunc;
-    net.registerOptimizer(new nn::StochasticGradientDescent<float>(0.01));
+    net.registerOptimizer(new nn::Adam<float>(0.01));
 
-    int numEpoch = 1000;
+    int numEpoch = 100;
     for (unsigned int ii = 0; ii < numEpoch; ++ii) {
         // Forward
         auto result = net.forward<2, 2>(inputData);
