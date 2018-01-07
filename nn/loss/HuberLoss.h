@@ -19,7 +19,7 @@ namespace nn {
         /**
          * @brief Initialize a SmoothL1Loss loss function
          */
-        HuberLoss(Dtype threshold = 1.0): m_threshold(threshold) {}
+        explicit HuberLoss(Dtype threshold = 1.0): m_threshold(threshold) {}
 
         /**
          * @brief Compute the loss
@@ -80,8 +80,10 @@ namespace nn {
 
         auto error = predictions - labels;
 
-        // TODO: Can simplify algebra? Doesn't this just equate to m_threshold * sgn(error)?
-        auto absoluteErrorGrad = error.constant(m_threshold) * (error / error.abs());
+        // Note: Grad of linear part of error is threshold * (error / abs(error)), which
+        // simplifies to threshold * sign(error)
+        auto errorPositiveOrZero = error >= static_cast<Dtype>(0);
+        auto absoluteErrorGrad = errorPositiveOrZero.select(error.constant(m_threshold), error.constant(-m_threshold));
         return m_cachedSwitchResults.select(error, absoluteErrorGrad);
     }
 }
