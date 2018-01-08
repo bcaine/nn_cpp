@@ -1,10 +1,35 @@
 ### nn_cpp - Minimalistic C++11 header only Neural Network Library
 
-**Not ready for use** Currently under active development, with several MVP features missing (see Todo subsection below)
+Currently under active development, with several minimally viable product features missing (see Todo subsection below)
 
 We make heavy use of the [Eigen::Tensor](https://bitbucket.org/eigen/eigen/src/default/unsupported/Eigen/CXX11/src/Tensor/README.md) library for computation.
 
 The goal is to make a simple library to inline small neural networks in modern C++ code without the overhead of a major framework.
+
+### Usage Example
+
+```c++
+
+nn::Net<float> net;
+net.add(new nn::Dense<float, 2>(batchSize, inputSize, numHiddenNodes, useBias));
+net.add(new nn::Relu<float, 2>());
+net.add(new nn::Dense<float, 2>(batchSize, numHiddenNodes, outputSize, useBias));
+net.add(new nn::Softmax<float, 2>());
+ 
+nn::CrossEntropyLoss<float, 2> lossFunc;
+net.registerOptimizer(new nn::Adam<float>(learningRate));
+ 
+int numEpoch = 100;
+for (int currentEpoch = 0; currentEpoch < numEpoch; ++currentEpoch) {
+    auto result = net.forward<2, 2>(input);
+    auto loss = lossFunc.loss(result, labels);
+    
+    net.backward(lossFunc.backward(result, labels));
+    net.step();
+    
+    std::cout << "Epoch: " << currentEpoch << " Loss: " << loss << std::endl;
+}
+```
 
 ### Dependencies
 
@@ -42,6 +67,7 @@ make test
 Currently, there are two very simple examples of training an MLP on some data.
 
 [BasicMLP.cpp](./examples/BasicMLP.cpp) - A two class problem of classifying separable 2D uniformly distributed data (donut vs donut hole)
+
 [IrisTest.cpp](./examples/IrisTest.cpp) - Classifying the Iris dataset with a simple MLP.
 
 These are built if you do the following:
